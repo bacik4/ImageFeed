@@ -6,7 +6,7 @@
 
 import UIKit
 
-class ImagesListViewController: UIViewController {
+final class ImagesListViewController: UIViewController {
     @IBOutlet private var tableView: UITableView!
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private lazy var dateFormatter: DateFormatter = {
@@ -28,11 +28,7 @@ class ImagesListViewController: UIViewController {
         cell.dateLabel.text = dateFormatter.string(from: Date())
         cell.cellImage.image = image
 
-        if indexPath.row % 2 == 0{
-            cell.likeButton.setImage(UIImage(named: "Active"), for: .normal)
-        }
-        else {cell.likeButton.setImage(UIImage(named: "No Active"), for: .normal)
-        }
+        cell.likeButton.setImage(UIImage(resource: indexPath.row % 2 == 0 ? .active : .noActive), for: .normal)
     }
 
 }
@@ -43,19 +39,19 @@ extension ImagesListViewController: UITableViewDelegate {
 
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        photosName.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath)
-            
-            guard let imageListCell = cell as? ImagesListCell else {
-                return UITableViewCell()
-            }
-            
-            configCell(for: imageListCell, with: indexPath)
-            return imageListCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath)
+        
+        guard let imageListCell = cell as? ImagesListCell else {
+            return UITableViewCell()
         }
+        
+        configCell(for: imageListCell, with: indexPath)
+        return imageListCell
+    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
         guard let image = UIImage(named: photosName[indexPath.row]) else {return 0}
