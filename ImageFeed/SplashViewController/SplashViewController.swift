@@ -19,7 +19,8 @@ final class SplashViewController: UIViewController{
     }
     
     private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+        let window = scene.windows.first else {
             assertionFailure("Invalid window configuration")
             return
         }
