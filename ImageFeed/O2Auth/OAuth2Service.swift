@@ -22,7 +22,10 @@ final class OAuth2Service {
         code: String,
         completion: @escaping (Result<String,Error>) -> Void){
             guard let request = makeOAuthTokenRequest(code: code) else {
-                completion(.failure(NetworkError.invalidRequest))
+                DispatchQueue.main.async {
+                    completion(.failure(NetworkError.invalidRequest))
+                }
+                print("Не удалось создать URLRequest для получения OAuth token")
                 return
             }
             let task = URLSession.shared.data(for: request) { result in
@@ -32,22 +35,30 @@ final class OAuth2Service {
                         let errorBody = String(data: data, encoding: .utf8) ?? "Не удалось прочитать тело ответа"
                             print("Ошибка Unsplash. Код: \(response.statusCode)")
                             print("Тело ответа: \(errorBody)")
-                        completion(.failure(NetworkError.httpStatusCode(response.statusCode)))
+                        DispatchQueue.main.async {
+                            completion(.failure(NetworkError.httpStatusCode(response.statusCode)))
+                        }
                         return
                     }
                     
                     do {
                         let responseBody = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
                         self.tokenStorage.token = responseBody.accessToken
-                        completion(.success(responseBody.accessToken))
+                        DispatchQueue.main.async {
+                            completion(.success(responseBody.accessToken))
+                        }
                     } catch {
                         print("Ошибка декодирования OAuthTokenResponseBody: \(error)")
-                        completion(.failure(NetworkError.decodingError(error)))
+                        DispatchQueue.main.async {
+                            completion(.failure(NetworkError.decodingError(error)))
+                        }
                     }
                     
                 case .failure(let error):
                     print("Сетевая ошибка: \(error)")
-                    completion(.failure(error))
+                    DispatchQueue.main.async {
+                        completion(.failure(error))
+                    }
                 }
             }
             task.resume()
@@ -55,6 +66,7 @@ final class OAuth2Service {
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: "https://unsplash.com/oauth/token") else{
+            print("Не удалось создать urlComponents для запроса OAuth token")
             return nil
         }
         urlComponents.queryItems = [
@@ -65,6 +77,7 @@ final class OAuth2Service {
             URLQueryItem(name: "grant_type", value: "authorization_code"),
         ]
         guard let authTokenUrl = urlComponents.url else {
+            print("Не удалось получить URL для запроса OAuth token")
             return nil
         }
         var request = URLRequest(url: authTokenUrl)

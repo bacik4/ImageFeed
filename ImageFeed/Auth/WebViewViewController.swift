@@ -30,6 +30,7 @@ final class WebViewViewController: UIViewController{
 
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
+            print("Не удалось создать urlComponents")
             return
         }
         
@@ -41,6 +42,7 @@ final class WebViewViewController: UIViewController{
         ]
         
         guard let url = urlComponents.url else {
+            print("Не удалось получить url из urlComponents")
             return
         }
         let request = URLRequest(url: url)
