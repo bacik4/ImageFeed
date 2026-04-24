@@ -19,7 +19,7 @@ final class ImagesListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
     }
     
@@ -28,28 +28,28 @@ final class ImagesListViewController: UIViewController {
         
         cell.dateLabel.text = dateFormatter.string(from: Date())
         cell.cellImage.image = image
-
+        
         cell.likeButton.setImage(UIImage(resource: indexPath.row % 2 == 0 ? .active : .noActive), for: .normal)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if segue.identifier == showSingleImageSegueIdentifier {
-                guard
-                    let viewController = segue.destination as? SingleImageViewController,
-                    let indexPath = sender as? IndexPath
-                else {
-                    assertionFailure("Invalid segue destination")
-                    return
-                }
-
-                let image = UIImage(named: photosName[indexPath.row])
-                //_ = viewController.view
-                viewController.image = image
-            } else {
-                super.prepare(for: segue, sender: sender)
+        if segue.identifier == showSingleImageSegueIdentifier {
+            guard
+                let viewController = segue.destination as? SingleImageViewController,
+                let indexPath = sender as? IndexPath
+            else {
+                assertionFailure("Invalid segue destination")
+                return
             }
+            
+            let image = UIImage(named: photosName[indexPath.row])
+            //_ = viewController.view
+            viewController.image = image
+        } else {
+            super.prepare(for: segue, sender: sender)
         }
-
+    }
+    
 }
 
 extension ImagesListViewController: UITableViewDelegate {
@@ -85,4 +85,13 @@ extension ImagesListViewController: UITableViewDataSource {
         return cellHeight
     }
     
+    func tableView(
+        _ tableView: UITableView,
+        willDisplay cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
+    ) {
+        
+    }
 }
+
+
