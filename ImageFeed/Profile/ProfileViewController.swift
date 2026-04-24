@@ -18,7 +18,7 @@ final class ProfileViewController: UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "YP Black")
+        view.backgroundColor = UIColor(resource: .ypBlack)
         setImageView()
         setLabel()
         setUsernameLabel()
@@ -30,23 +30,23 @@ final class ProfileViewController: UIViewController{
         }
         
         profileImageServiceObserver = NotificationCenter.default
-                   .addObserver(
-                       forName: ProfileImageService.didChangeNotification,
-                       object: nil,
-                       queue: .main
-                   ) { [weak self] _ in
-                       guard let self = self else { return }
-                       self.updateAvatar()
-                   }
-               updateAvatar()
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
     }
     
     private func updateAvatar() {
-            guard
-                let imageView,
-                let profileImageURL = ProfileImageService.shared.avatarURL,
-                let url = URL(string: profileImageURL)
-            else { return }
+        guard
+            let imageView,
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
         
         let placeholderImage = UIImage(systemName: "person.circle.fill")?
             .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
@@ -75,7 +75,7 @@ final class ProfileViewController: UIViewController{
                 }
                 
             }
-        }
+    }
     
     private func updateProfileDetails(profile: Profile){
         nameLabel?.text = profile.name
@@ -108,8 +108,9 @@ final class ProfileViewController: UIViewController{
     }
     
     private func setUsernameLabel(){
-        guard let imageView = imageView else { return }
-        guard let nameLabel = nameLabel else { return }
+        guard
+            let imageView = imageView,
+            let nameLabel = nameLabel else { return }
         let usernameLabel = UILabel()
         usernameLabel.textColor = UIColor(
             red: 174/255,
@@ -121,9 +122,11 @@ final class ProfileViewController: UIViewController{
         self.usernameLabel = usernameLabel
         usernameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(usernameLabel)
-        usernameLabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
-        usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
-        usernameLabel.widthAnchor.constraint(equalToConstant: 99).isActive = true
+        NSLayoutConstraint.activate([
+            usernameLabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            usernameLabel.widthAnchor.constraint(equalToConstant: 99)
+        ])
     }
     
     private func setDescription(){

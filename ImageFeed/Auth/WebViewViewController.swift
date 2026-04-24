@@ -29,12 +29,12 @@ final class WebViewViewController: UIViewController{
         updateProgress()
         
         estimatedProgressObservation = webView.observe(
-                    \.estimatedProgress,
-                    options: [],
-                    changeHandler: { [weak self] _, _ in
-                        guard let self = self else { return }
-                        self.updateProgress()
-                    })
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 guard let self else { return }
+                 self.updateProgress()
+             })
     }
 
     private func loadAuthView() {
