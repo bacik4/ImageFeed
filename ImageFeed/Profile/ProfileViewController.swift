@@ -4,26 +4,87 @@
 //
 //
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController{
-    private var namelabel: UILabel?
+    private var nameLabel: UILabel?
     private var usernameLabel: UILabel?
     private var descriptionLabel: UILabel?
     private var imageView: UIImageView?
     private var uiButton: UIButton?
     
+    private var profileImageServiceObserver: NSObjectProtocol?
+    private let profileService = ProfileService.shared
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypBlack)
         setImageView()
         setLabel()
         setUsernameLabel()
         setDescription()
         setButton()
+        
+        if let profile = profileService.profile{
+            updateProfileDetails(profile: profile)
+        }
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
+    }
+    
+    private func updateAvatar() {
+        guard
+            let imageView,
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        
+        let placeholderImage = UIImage(systemName: "person.circle.fill")?
+            .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
+            .withConfiguration(UIImage.SymbolConfiguration(pointSize: 70, weight: .regular, scale: .large))
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 35)
+        imageView.kf.indicatorType = .activity
+        
+        imageView.kf.setImage(
+            with: url,
+            placeholder: placeholderImage,
+            options: [
+                .processor(processor),
+                .scaleFactor(view.traitCollection.displayScale),
+                .cacheOriginalImage,
+                .forceRefresh
+            ]){ result in
+                switch result{
+                case .success(let value):
+                    print(value.image)
+                    print(value.cacheType)
+                    print(value.source)
+                    
+                case .failure(let error):
+                    print(error)
+                }
+                
+            }
+    }
+    
+    private func updateProfileDetails(profile: Profile){
+        nameLabel?.text = profile.name
+        usernameLabel?.text = profile.loginName
+        descriptionLabel?.text = profile.bio ?? ""
     }
     
     private func setImageView(){
-        let profileImage = UIImage(named: "Avatar")
-        let imageView = UIImageView(image: profileImage)
+        let imageView = UIImageView()
         self.imageView = imageView
         imageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(imageView)
@@ -36,10 +97,9 @@ final class ProfileViewController: UIViewController{
     private func setLabel(){
         guard let imageView = imageView else { return }
         let namelabel = UILabel()
-        namelabel.text = "Екатерина Новикова"
         namelabel.textColor = .ypWhiteIOS
         namelabel.font = .boldSystemFont(ofSize: 23)
-        self.namelabel = namelabel
+        self.nameLabel = namelabel
         namelabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(namelabel)
         namelabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
@@ -48,10 +108,10 @@ final class ProfileViewController: UIViewController{
     }
     
     private func setUsernameLabel(){
-        guard let imageView = imageView else { return }
-        guard let namelabel = namelabel else { return }
+        guard
+            let imageView = imageView,
+            let nameLabel = nameLabel else { return }
         let usernameLabel = UILabel()
-        usernameLabel.text = "@ekaterina_nov"
         usernameLabel.textColor = UIColor(
             red: 174/255,
             green: 175/255,
@@ -62,16 +122,17 @@ final class ProfileViewController: UIViewController{
         self.usernameLabel = usernameLabel
         usernameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(usernameLabel)
-        usernameLabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
-        usernameLabel.topAnchor.constraint(equalTo: namelabel.bottomAnchor, constant: 8).isActive = true
-        usernameLabel.widthAnchor.constraint(equalToConstant: 99).isActive = true
+        NSLayoutConstraint.activate([
+            usernameLabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            usernameLabel.widthAnchor.constraint(equalToConstant: 99)
+        ])
     }
     
     private func setDescription(){
         guard let imageView = imageView else { return }
         guard let usernameLabel = usernameLabel else { return }
         let descriptionLabel = UILabel()
-        descriptionLabel.text = "Hello, world!"
         descriptionLabel.textColor = .ypWhiteIOS
         descriptionLabel.font = .systemFont(ofSize: 13)
         self.descriptionLabel = descriptionLabel
