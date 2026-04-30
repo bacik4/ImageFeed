@@ -13,7 +13,7 @@
         <scene sceneID="CCQ-21-WL2">
             <objects>
                 <viewController storyboardIdentifier="AuthViewController" id="jKb-HY-VEF" userLabel="AuthViewController" customClass="AuthViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="YBm-IA-rN3">
+                    <view key="view" contentMode="scaleToFill" id="YBm-IA-rN3">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -121,6 +121,9 @@
                                                     </constraints>
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="Active"/>
+                                                    <connections>
+                                                        <action selector="likeButtonClicked" destination="WNZ-sY-NQH" eventType="touchUpInside" id="MGN-71-nDK"/>
+                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>

@@ -16,6 +16,8 @@ final class ProfileViewController: UIViewController{
     private var profileImageServiceObserver: NSObjectProtocol?
     private let profileService = ProfileService.shared
     
+    private var animationLayers: [CALayer] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(resource: .ypBlack)
@@ -27,6 +29,8 @@ final class ProfileViewController: UIViewController{
         
         if let profile = profileService.profile{
             updateProfileDetails(profile: profile)
+        } else{
+            addGradientLayers()
         }
         
         profileImageServiceObserver = NotificationCenter.default
@@ -35,8 +39,9 @@ final class ProfileViewController: UIViewController{
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.updateAvatar()
+                self.removeGradientLayers()
             }
         updateAvatar()
     }
@@ -158,9 +163,103 @@ final class ProfileViewController: UIViewController{
         uiButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
     
+    private func makeGradientLayer(size: CGSize, cornerRadius: CGFloat) -> CAGradientLayer {
+        let gradient = CAGradientLayer()
+        gradient.frame = CGRect(origin: .zero, size: size)
+        gradient.locations = [0, 0.1, 0.3]
+        gradient.colors = [
+            UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 1).cgColor,
+            UIColor(red: 0.531, green: 0.533, blue: 0.553, alpha: 1).cgColor,
+            UIColor(red: 0.431, green: 0.433, blue: 0.453, alpha: 1).cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.cornerRadius = cornerRadius
+        gradient.masksToBounds = true
+        
+        let gradientChangeAnimation = CABasicAnimation(keyPath: "locations")
+        gradientChangeAnimation.duration = 1.0
+        gradientChangeAnimation.repeatCount = .infinity
+        gradientChangeAnimation.fromValue = [0, 0.1, 0.3]
+        gradientChangeAnimation.toValue = [0, 0.8, 1]
+        
+        gradient.add(gradientChangeAnimation, forKey: "locationsChange")
+        
+        return gradient
+    }
+    
+    private func addGradientLayers() {
+        removeGradientLayers()
+        guard
+            let imageView,
+            let nameLabel,
+            let usernameLabel,
+            let descriptionLabel
+        else { return }
+        
+        let avatarGradient = makeGradientLayer(
+            size: CGSize(width: 70, height: 70),
+            cornerRadius: 35
+        )
+        
+        let nameGradient = makeGradientLayer(
+            size: CGSize(width: 223, height: 18),
+            cornerRadius: 9
+        )
+        
+        let usernameGradient = makeGradientLayer(
+            size: CGSize(width: 89, height: 18),
+            cornerRadius: 9
+        )
+        
+        let descriptionGradient = makeGradientLayer(
+            size: CGSize(width: 67, height: 18),
+            cornerRadius: 9
+        )
+        
+        imageView.layer.addSublayer(avatarGradient)
+        nameLabel.layer.addSublayer(nameGradient)
+        usernameLabel.layer.addSublayer(usernameGradient)
+        descriptionLabel.layer.addSublayer(descriptionGradient)
+        
+        animationLayers = [
+            avatarGradient,
+            nameGradient,
+            usernameGradient,
+            descriptionGradient
+        ]
+    }
+    
+    private func removeGradientLayers() {
+        animationLayers.forEach { $0.removeFromSuperlayer() }
+        animationLayers.removeAll()
+    }
+    
     @objc
     private func didTapButton(){
+        let alert = UIAlertController(title: "Пока, пока!", message: "Уверены что хотите выйти?", preferredStyle: .alert)
         
+        let yes = UIAlertAction(title: "Да", style: .default){[weak self] _ in
+            ProfileLogoutService.shared.logout()
+            self?.switchToSplashViewController()
+        }
+        let no = UIAlertAction(title: "Нет", style: .cancel)
+
+        alert.addAction(yes)
+        alert.addAction(no)
+        
+        present(alert, animated: true)
+    }
+    
+    
+    private func switchToSplashViewController() {
+        guard let window = view.window else {
+            assertionFailure("Invalid window configuration")
+            return
+        }
+        
+        let splashViewController = SplashViewController()
+        window.rootViewController = splashViewController
     }
 }
 

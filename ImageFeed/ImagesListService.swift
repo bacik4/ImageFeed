@@ -97,6 +97,13 @@ final class ImagesListService {
         
     }
     
+    func resetPhotos(){
+        photos = []
+        lastLoadedPage = nil
+        task?.cancel()
+        task = nil
+    }
+    
     private func makePhoto(from photoResult: PhotoResult) -> Photo {
         Photo(
             id: photoResult.id,
@@ -119,5 +126,73 @@ final class ImagesListService {
         request.httpMethod = HTTPMethod.get.rawValue
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void){
+        guard let token = tokenStorage.token else {
+            print("[ImagesListService.changeLike]: token is nil")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        guard let request = makeChangeLikeRequest(photoId: photoId,isLike: isLike,token: token) else {
+            print("[ImagesListService.changeLike]: failed to make request")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        let task = urlSession.data(for: request) {[weak self] result in
+            guard let self else {return}
+            switch result {
+            case .success:
+                DispatchQueue.main.async {
+                    if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                        let photo = self.photos[index]
+                        let newPhoto = Photo(
+                            id: photo.id,
+                            size: photo.size,
+                            createdAt: photo.createdAt,
+                            welcomeDescription: photo.welcomeDescription,
+                            thumbImageURL: photo.thumbImageURL,
+                            largeImageURL: photo.largeImageURL,
+                            isLiked: !photo.isLiked
+                        )
+                        self.photos = self.photos.withReplaced(itemAt: index, newValue: newPhoto)
+                    }
+                    completion(.success(()))
+                }
+                
+            case .failure(let error):
+                print("[ImagesListService.changeLike]: \(error)")
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+        
+        task.resume()
+        
+    }
+    
+    private func makeChangeLikeRequest(photoId: String, isLike: Bool, token: String
+    ) -> URLRequest? {
+        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
+            print("[ImagesListService.makeChangeLikeRequest]: failed to make url")
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = isLike ? HTTPMethod.post.rawValue : HTTPMethod.delete.rawValue
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        return request
+    }
+}
+
+extension Array {
+    func withReplaced(itemAt index: Int, newValue: Element) -> [Element] {
+        var newArray = self
+        newArray[index] = newValue
+        return newArray
     }
 }

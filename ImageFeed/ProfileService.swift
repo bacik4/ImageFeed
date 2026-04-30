@@ -70,6 +70,12 @@ final class ProfileService {
         task.resume()
     }
     
+    func resetProfile(){
+        profile = nil
+        task?.cancel()
+        task = nil
+    }
+    
     private func makeProfileRequest(token: String) -> URLRequest? {
         guard let url = URL(string: "https://api.unsplash.com/me") else{
             print("[ProfileService.makeProfileRequest]: invalidURL - token: \(token)")
