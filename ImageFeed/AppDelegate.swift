@@ -3,17 +3,27 @@
 //  ImageFeed
 //
 //
-
+import ProgressHUD
 import UIKit
+import SwiftUI
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+final class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        setupProgressHUD()
         return true
+    }
+    
+    // MARK: - Private Methods
+
+    private func setupProgressHUD() {
+        ProgressHUD.animationType = .activityIndicator
+        ProgressHUD.colorHUD = Color.white
+        ProgressHUD.colorAnimation = Color.black
     }
 
     // MARK: UISceneSession Lifecycle
