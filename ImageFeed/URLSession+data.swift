@@ -23,33 +23,33 @@ extension URLSession {
                 completion(result)
             }
         }
-
+        
         let task = dataTask(with: request) { data, response, error in
             if let error {
                 print("[URLSession.data]: urlRequestError - \(error.localizedDescription)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
                 return
             }
-
+            
             guard let data,
                   let response = response as? HTTPURLResponse else {
                 print("[URLSession.data]: urlSessionError - response or data is nil")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
                 return
             }
-
+            
             fulfillCompletionOnTheMainThread(.success((data, response)))
         }
-
+        
         return task
     }
-
+    
     func objectTask<T: Decodable>(
         for request: URLRequest,
         completion: @escaping (Result<T, Error>) -> Void
     ) -> URLSessionTask {
         let decoder = JSONDecoder()
-
+        
         let task = data(for: request) { (result: Result<(Data, HTTPURLResponse), Error>) in
             switch result {
             case .success(let (data, response)):
@@ -58,7 +58,7 @@ extension URLSession {
                     completion(.failure(NetworkError.httpStatusCode(response.statusCode)))
                     return
                 }
-
+                
                 do {
                     let decodedObject = try decoder.decode(T.self, from: data)
                     completion(.success(decodedObject))
@@ -66,13 +66,13 @@ extension URLSession {
                     print("[URLSession.objectTask]: decodingError - \(error.localizedDescription), data: \(String(data: data, encoding: .utf8) ?? "")")
                     completion(.failure(NetworkError.decodingError(error)))
                 }
-
+                
             case .failure(let error):
                 print("[URLSession.objectTask]: requestError - \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
-
+        
         return task
     }
 }

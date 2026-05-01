@@ -5,16 +5,24 @@
 import Foundation
 import WebKit
 
+// MARK: - ProfileLogoutService
+
 final class ProfileLogoutService {
-    static let shared = ProfileLogoutService()
+    // MARK: - Singleton
     
+    static let shared = ProfileLogoutService()
+
     private init() { }
+    
+    // MARK: - Public Methods
     
     func logout() {
         cleanCookies()
         deleteToken()
         cleanServices()
     }
+    
+    // MARK: - Private Methods
     
     private func cleanCookies() {
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)

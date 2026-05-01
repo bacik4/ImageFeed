@@ -149,9 +149,9 @@ final class ProfileViewController: UIViewController{
     }
     
     private func setButton(){
-        guard let imageView = imageView else { return }
+        guard let imageView else { return }
         let uiButton = UIButton.systemButton(
-            with: UIImage(named: "Logout_button")!.withRenderingMode(.alwaysOriginal),
+            with: UIImage(resource: .logoutButton).withRenderingMode(.alwaysOriginal),
             target: self,
             action: #selector(self.didTapButton))
         self.uiButton = uiButton

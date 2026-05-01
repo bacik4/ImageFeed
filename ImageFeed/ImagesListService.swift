@@ -5,47 +5,11 @@
 import Foundation
 import UIKit
 
-struct Photo {
-    let id: String
-    let size: CGSize
-    let createdAt: Date?
-    let welcomeDescription: String?
-    let thumbImageURL: String
-    let largeImageURL: String
-    let isLiked: Bool
-}
-
-struct PhotoResult: Codable{
-    let id: String
-    let createdAt: String
-    let width: Int
-    let height: Int
-    let likedByUser: Bool
-    let description: String?
-    let urls: UrlsResult
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case createdAt = "created_at"
-        case width
-        case height
-        case likedByUser = "liked_by_user"
-        case description
-        case urls
-    }
-}
-
-struct UrlsResult: Codable {
-    let raw: String
-    let full: String
-    let regular: String
-    let small: String
-    let thumb: String
-}
-
 final class ImagesListService {
     private(set) var photos: [Photo] = []
     static let shared = ImagesListService()
+    
+    private let isoDateFormatter = ISO8601DateFormatter()
     
     private var lastLoadedPage: Int?
     private var task: URLSessionTask?
@@ -108,7 +72,7 @@ final class ImagesListService {
         Photo(
             id: photoResult.id,
             size: CGSize(width: photoResult.width, height: photoResult.height),
-            createdAt: ISO8601DateFormatter().date(from: photoResult.createdAt),
+            createdAt: isoDateFormatter.date(from: photoResult.createdAt),
             welcomeDescription: photoResult.description,
             thumbImageURL: photoResult.urls.thumb,
             largeImageURL: photoResult.urls.full,
@@ -180,19 +144,11 @@ final class ImagesListService {
             print("[ImagesListService.makeChangeLikeRequest]: failed to make url")
             return nil
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = isLike ? HTTPMethod.post.rawValue : HTTPMethod.delete.rawValue
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
+        
         return request
-    }
-}
-
-extension Array {
-    func withReplaced(itemAt index: Int, newValue: Element) -> [Element] {
-        var newArray = self
-        newArray[index] = newValue
-        return newArray
     }
 }
