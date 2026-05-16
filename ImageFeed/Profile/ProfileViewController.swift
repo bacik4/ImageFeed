@@ -6,6 +6,11 @@
 import UIKit
 import Kingfisher
 
+protocol ProfileViewControllerProtocol: AnyObject {
+    func updateProfileDetails(profile: Profile)
+    func showLoadingSkeleton()
+}
+
 final class ProfileViewController: UIViewController{
     private var nameLabel: UILabel?
     private var usernameLabel: UILabel?
@@ -14,24 +19,25 @@ final class ProfileViewController: UIViewController{
     private var uiButton: UIButton?
     
     private var profileImageServiceObserver: NSObjectProtocol?
-    private let profileService = ProfileService.shared
+    private var presenter: ProfilePresenterProtocol!
     
     private var animationLayers: [CALayer] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if presenter == nil {
+            configure(ProfilePresenter())
+        }
+        
         view.backgroundColor = UIColor(resource: .ypBlack)
         setImageView()
         setLabel()
         setUsernameLabel()
         setDescription()
         setButton()
-        
-        if let profile = profileService.profile{
-            updateProfileDetails(profile: profile)
-        } else{
-            addGradientLayers()
-        }
+ 
+        presenter.viewDidLoad()
         
         profileImageServiceObserver = NotificationCenter.default
             .addObserver(
@@ -44,6 +50,11 @@ final class ProfileViewController: UIViewController{
                 self.removeGradientLayers()
             }
         updateAvatar()
+    }
+    
+    func configure(_ presenter: ProfilePresenterProtocol) {
+        self.presenter = presenter
+        presenter.view = self
     }
     
     private func updateAvatar() {
@@ -80,12 +91,6 @@ final class ProfileViewController: UIViewController{
                 }
                 
             }
-    }
-    
-    private func updateProfileDetails(profile: Profile){
-        nameLabel?.text = profile.name
-        usernameLabel?.text = profile.loginName
-        descriptionLabel?.text = profile.bio ?? ""
     }
     
     private func setImageView(){
@@ -263,3 +268,14 @@ final class ProfileViewController: UIViewController{
     }
 }
 
+extension ProfileViewController: ProfileViewControllerProtocol {
+    func updateProfileDetails(profile: Profile) {
+        nameLabel?.text = profile.name
+        usernameLabel?.text = profile.loginName
+        descriptionLabel?.text = profile.bio ?? ""
+    }
+
+    func showLoadingSkeleton() {
+        addGradientLayers()
+    }
+}
