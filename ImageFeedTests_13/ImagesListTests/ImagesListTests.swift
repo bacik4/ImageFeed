@@ -11,7 +11,7 @@ final class ImagesListTests: XCTestCase {
     
     @MainActor
     func testViewControllerCallsPresenterViewDidLoad() {
-        //given
+        // Given
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let viewController = storyboard.instantiateViewController(
             withIdentifier: "ImagesListViewController"
@@ -20,16 +20,16 @@ final class ImagesListTests: XCTestCase {
         
         viewController.configure(presenter)
         
-        //when
+        // When
         viewController.loadViewIfNeeded()
         
-        //then
+        // Then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
     
     @MainActor
     func testViewControllerCallsPresenterDidReachLastCell() {
-        //given
+        //Given
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let viewController = storyboard.instantiateViewController(
             withIdentifier: "ImagesListViewController"
@@ -47,13 +47,13 @@ final class ImagesListTests: XCTestCase {
             forRowAt: IndexPath(row: 0, section: 0)
         )
         
-        // then
+        // Then
         XCTAssertTrue(presenter.didReachLastCellCalled)
     }
     
     @MainActor
     func testViewControllerDoesNotCallPresenterDidReachLastCellWhenCellIsNotLast() {
-        // given
+        // Given
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let viewController = storyboard.instantiateViewController(
             withIdentifier: "ImagesListViewController"
@@ -65,27 +65,27 @@ final class ImagesListTests: XCTestCase {
         viewController.configure(presenter)
         viewController.loadViewIfNeeded()
 
-        // when
+        // When
         viewController.tableView(
             UITableView(),
             willDisplay: UITableViewCell(),
             forRowAt: IndexPath(row: 0, section: 0)
         )
 
-        // then
+        // Then
         XCTAssertFalse(presenter.didReachLastCellCalled)
     }
     
     @MainActor
     func testPresenterSpyRecordsDidTapLike() {
-        // given
+        // Given
         let presenter = ImagesListPresenterSpy()
         let indexPath = IndexPath(row: 0, section: 0)
         
-        // when
+        // When
         presenter.didTapLike(at: indexPath)
         
-        // then
+        // Then
         XCTAssertTrue(presenter.didTapLikeCalled)
         XCTAssertEqual(presenter.didTapLikeIndexPath, indexPath)
     }

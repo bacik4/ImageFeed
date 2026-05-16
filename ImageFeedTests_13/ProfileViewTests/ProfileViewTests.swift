@@ -11,16 +11,16 @@ final class ProfileViewTests: XCTestCase {
     
     @MainActor
     func testViewControllerCallsPresenterViewDidLoad() {
-        //given
+        // Given
         let viewController = ProfileViewController()
         let presenter = ProfilePresenterSpy()
         
         viewController.configure(presenter)
         
-        //when
+        // When
         _ = viewController.view
         
-        //then
+        // Then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
     

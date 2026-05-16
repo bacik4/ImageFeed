@@ -30,9 +30,14 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         }
     }
     
-    func viewDidLoad(){
+    func viewDidLoad() {
         photosCountBeforeUpdate = imagesListService.photos.count
         
+        setupImagesObserver()
+        fetchNextPage()
+    }
+    
+    private func setupImagesObserver() {
         imagesListServiceObserver = NotificationCenter.default.addObserver(
             forName: ImagesListService.didChangeNotification,
             object: nil,
@@ -46,11 +51,13 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
             self.photosCountBeforeUpdate = newCount
             self.view?.updateTableViewAnimated(oldCount: oldCount, newCount: newCount)
         }
-        
+    }
+    
+    private func fetchNextPage() {
         imagesListService.fetchPhotosNextPage()
     }
     
-    func didReachLastCell(){
+    func didReachLastCell() {
         imagesListService.fetchPhotosNextPage()
     }
     
